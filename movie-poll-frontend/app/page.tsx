@@ -83,21 +83,29 @@ export default function Home() {
 
   const [selectedMovie, setSelectedMovie] = useState('');
 
-  const { writeContract: vote } = useWriteContract();
+  const { writeContractAsync: vote } = useWriteContract();
 
   const handleVote = async () => {
-    if (!selectedMovie) return;
+    if (!selectedMovie) {
+      console.log('No movie selected');
+      return;
+    }
 
     try {
-      await vote({
+      console.log('Attempting to vote for:', selectedMovie);
+      const tx = await vote({
         address: contractAddress,
         abi: abi,
         functionName: 'vote',
         args: [selectedMovie],
       });
+      console.log('Vote transaction:', tx);
+
+      // Refresh vote counts
+      await fetchVoteCounts();
     } catch (error: any) {
       console.error('Error voting:', error);
-      alert('Failed to vote: ' + error.message);
+      alert(`Failed to vote: ${error.message}`);
     }
   };
 
